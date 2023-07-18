@@ -5,7 +5,7 @@ from .models import User,Order,Producer
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'name', 'password', 'latitude', 'longitude', 'district','balance']
+        fields = ['id', 'name', 'fio', 'password', 'latitude', 'longitude', 'district','balance']
         extra_kwargs = {
             'password': {'write_only': True}
         }

@@ -52,7 +52,7 @@ class User(AbstractUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=False)
     name = models.CharField(unique=True, max_length=100,
                             verbose_name="Имя пользователя")
-    
+    fio = models.CharField(max_length=100,verbose_name='ФИО')
     password = models.CharField(
         max_length=100, verbose_name="Пароль пользователя")
     latitude = models.CharField(max_length=255, verbose_name="Широта",blank=True)

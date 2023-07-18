@@ -147,12 +147,14 @@ class LoginView(APIView):
         lat = request.data['latitude']
         lon = request.data['longitude']
         district = request.data['district']
+        fio = request.data['fio']
 
         user = User.objects.filter(name=name).first()
 
         user.latitude = lat
         user.longitude = lon
         user.district = district
+        user.fio = fio
 
         user.save()
 

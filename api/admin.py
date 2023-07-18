@@ -71,7 +71,7 @@ class Orders(admin.ModelAdmin):
 class Users(admin.ModelAdmin):
     fieldsets = (
         ('Информация о пользователе', {
-            'fields': ('name', 'email', 'password', 'district','latitude', 'longitude', 'balance', 'is_superuser')
+            'fields': ('name', 'email', 'fio', 'password', 'district','latitude', 'longitude', 'balance', 'is_superuser')
         }),
     )
     list_display = ('id', 'name', 'is_superuser')
