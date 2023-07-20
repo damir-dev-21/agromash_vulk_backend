@@ -2,6 +2,11 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 import json
+from django.utils.safestring import mark_safe
+
+
+    
+
 
 class TimeBasedModel(models.Model):
     class Meta:
@@ -19,6 +24,7 @@ class Car(TimeBasedModel):
 
     id = models.AutoField(primary_key=True)
     number = models.CharField(max_length=200, verbose_name='Номер машины')
+    image = models.ImageField(upload_to='media/cars',default=None)
     created_at = models.DateTimeField(editable=True,
         auto_now_add=True, verbose_name='Дата создания')
 
@@ -52,7 +58,7 @@ class User(AbstractUser, PermissionsMixin):
     username = models.CharField(max_length=30, unique=False)
     name = models.CharField(unique=True, max_length=100,
                             verbose_name="Имя пользователя")
-    fio = models.CharField(max_length=100,verbose_name='ФИО')
+    fio = models.CharField(max_length=100,verbose_name='ФИО', blank=True)
     password = models.CharField(
         max_length=100, verbose_name="Пароль пользователя")
     latitude = models.CharField(max_length=255, verbose_name="Широта",blank=True)
@@ -92,17 +98,22 @@ class Order(TimeBasedModel):
 
 class Mark(TimeBasedModel):
 
+    def image_preview(self):
+        if self.image:
+            return mark_safe(f'<img src="{self.photo.url}" width="150" height="150" />')
+        else:
+            return '(No image)'
+
     class Meta:
         verbose_name = 'Уникальный код'
         verbose_name_plural = 'Уникальные коды'
 
     mark = models.CharField(verbose_name='Код', max_length=500)
-    photo = models.CharField(max_length=1000, verbose_name='Код фотки')
+    photo = models.ImageField(upload_to='media/marks', verbose_name='Изображение')
     order = models.ForeignKey(
         Order, on_delete=models.CASCADE, related_name='marks')
     created_at = models.DateTimeField(editable=True,
         auto_now_add=True, verbose_name='Дата создания')
-
 
 class Category(TimeBasedModel):
     
@@ -141,5 +152,10 @@ class Item(TimeBasedModel):
 
 
 class ItemMark(TimeBasedModel):
+
+
+    def thumbnail(self):
+        return u'<img src="{self.photo.url}" />' % (self.image.url)
+
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='marks')
     mark = models.CharField(max_length=1000)

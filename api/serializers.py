@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import User,Order,Producer
+from .models import User,Order,Producer,Car
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'fio', 'password', 'latitude', 'longitude', 'district','balance']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        # extra_kwargs = {
+        #     'password': {'write_only': True}
+        # }
 
     def create(self, validated_data):
         password = validated_data.pop('password', None)
@@ -28,4 +28,10 @@ class OrderSerializer(serializers.ModelSerializer):
 class ProducerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producer
+        fields = "__all__"
+
+
+class CarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Car
         fields = "__all__"

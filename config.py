@@ -1,5 +1,5 @@
-PGUSER="user"
-PGPASSWORD="SiyoB123"
+PGUSER="postgres"
+PGPASSWORD="1234"
 DATABASE="vulkdb"
 DBHOST="localhost"
 PORT="5432"

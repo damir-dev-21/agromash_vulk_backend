@@ -1,15 +1,21 @@
 from django.shortcuts import render
-from .serializers import UserSerializer,OrderSerializer,ProducerSerializer
+from .serializers import UserSerializer, OrderSerializer, ProducerSerializer, CarSerializer
 from rest_framework.views import APIView
 from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from .models import User, Item, Car, Order, Mark,Producer
+from .models import User, Item, Car, Order, Mark, Producer
 from django.forms.models import model_to_dict
 import jwt
 import datetime
 import json
+
+import base64
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from PIL import Image
+from io import BytesIO
 
 
 class ItemViews(APIView):
@@ -34,30 +40,109 @@ class RegisterUserView(APIView):
         }
         return responce
 
+
 class AllBrands(APIView):
 
-    def get(self,request):
+    def get(self, request):
 
         producers = Producer.objects.filter().all()
 
-        producersSerializers = ProducerSerializer(data=producers,many=True)
+        producersSerializers = ProducerSerializer(data=producers, many=True)
         producersSerializers.is_valid()
         responce = Response()
         responce.data = {
-            'brands':producersSerializers.data
+            'brands': producersSerializers.data
         }
 
         return responce
 
 
+def create_image_from_base64(base64_string):
+    # Декодируем base64 строку
+    decoded_image = base64.b64decode(base64_string)
+
+    # Создаем объект Image из декодированных данных
+    image = Image.open(BytesIO(decoded_image))
+
+    # Может потребоваться изменить размер или выполнить другую обработку изображения здесь,
+    # в зависимости от ваших требований
+
+    # Получаем тип изображения
+    image_format = image.format.lower()
+
+    # Создаем временный объект InMemoryUploadedFile
+    image_io = BytesIO()
+    image.save(image_io, format=image_format)
+    image_file = InMemoryUploadedFile(
+        image_io, None, "image.png", f'images/{image_format}', len(
+            image_io.getvalue()), None
+    )
+
+    return image_file
+
+
+class CreateOrder(APIView):
+
+    def post(self, request):
+
+        responce = Response()
+
+        try:
+            carBody = request.data['car']
+            brandBody = request.data['brand']
+            userBody = request.data['user']
+            marksBody = request.data['marks']
+
+            newCar = Car()
+            newCar.number = carBody['number']
+            newCar.image = create_image_from_base64(carBody['base64_file'])
+            newCar.save()
+
+            brand = Producer.objects.filter(name=brandBody).first()
+            user = User.objects.filter(id=userBody['id']).first()
+
+            newOrder = Order()
+            newOrder.carNumber = newCar
+            newOrder.brand = brand
+            newOrder.user = user
+            newOrder.save()
+
+            idOrder = newOrder.id
+
+            for item in marksBody:
+                image_field = create_image_from_base64(item['base64_file'])
+
+                newMark = Mark()
+                newMark.mark = item['mark']
+                newMark.photo = image_field
+                newMark.order = newOrder
+                newMark.save()
+
+            responce.data = {
+                'status': True,
+                'message': 'OK'
+            }
+
+            return responce
+        except Exception as e:
+            responce.data = {
+                'status': False,
+                'message':e 
+            }
+        
+        return responce
+
+
 class CheckCar(APIView):
 
-    def post(self,request):
+    def post(self, request):
 
         number = request.data['number']
+        imageBase64 = request.data['base64_file']
+        image_field = create_image_from_base64(imageBase64)
 
         car = Car.objects.filter(number=number).first()
-       
+
         if car is None:
             responce = Response()
 
@@ -76,7 +161,6 @@ class CheckCar(APIView):
             }
 
             return responce
-
 
 
 class CheckAccessView(APIView):
@@ -112,7 +196,7 @@ class CheckAccessView(APIView):
             return responce
         else:
             serializer = UserSerializer(user)
-            
+
             orders = Order.objects.filter(user=user).all()
 
             responce = Response()
@@ -131,7 +215,6 @@ class CheckAccessView(APIView):
             }
 
             return responce
-
 
 
 class LoginView(APIView):
