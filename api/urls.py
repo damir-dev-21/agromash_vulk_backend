@@ -9,6 +9,7 @@ urlpatterns = [
     path('checkAccess/',views.CheckAccessView.as_view()),
     path('checkCar/',views.CheckCar.as_view()),
     path('createOrder/',views.CreateOrder.as_view()),
+    path('order/', views.GetOrder.as_view()),
     path('brands/', views.AllBrands.as_view()),
     path('logout/', views.LogoutView.as_view())
 ]

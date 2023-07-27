@@ -81,6 +81,66 @@ def create_image_from_base64(base64_string):
     return image_file
 
 
+class GetOrder(APIView):
+
+    def post(self,request):
+
+        responce = Response()
+
+        idOrder = request.data['id']
+
+        try:
+            order = Order.objects.filter(id=idOrder).first()
+
+            marks = Mark.objects.filter(order=order).all()
+
+            images = []
+
+            for item in marks:
+                with open(item.photo.path, 'rb') as f:
+                    encoded = base64.b64encode(f.read())
+                    
+                    images.append({
+                        'mark':item.mark,
+                        'base64_file':encoded,
+                        'number':item.mark,
+                        'image':''
+                    })
+
+            producer = {
+                'name':order.brand.name,
+                'truck':order.brand.truck,
+                'passenger': order.brand.passenger,
+                'condition': order.brand.condition
+            }
+           
+            carNumber = {
+                'number':order.carNumber.number
+            }
+
+            responceOrder = {
+                'brand':producer,
+                'carNumber': carNumber,
+                'images':images
+            }
+
+            responce.data = {
+                'status': True,
+                'message': 'OK',
+                'data':responceOrder
+            }
+
+            return responce
+
+
+        except Exception as e:
+            responce.data = {
+                'status': False,
+                'message': e
+            }
+
+        return responce
+
 class CreateOrder(APIView):
 
     def post(self, request):
