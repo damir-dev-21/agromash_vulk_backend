@@ -44,6 +44,7 @@ class Producer(TimeBasedModel):
     truck = models.BooleanField(default=False, verbose_name='Грузовой')
     condition = models.CharField(default='',
         max_length=500, verbose_name='Условия распознования', blank=True)
+    summa = models.FloatField(default=0,verbose_name='Кешбэк')
 
     def __str__(self):
         return f"№{self.id} - {self.name}"

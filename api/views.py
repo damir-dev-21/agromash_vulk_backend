@@ -101,6 +101,10 @@ class CreateOrder(APIView):
             brand = Producer.objects.filter(name=brandBody).first()
             user = User.objects.filter(id=userBody['id']).first()
 
+            user.balance = user.balance + brand.summa
+
+            user.save()
+
             newOrder = Order()
             newOrder.carNumber = newCar
             newOrder.brand = brand

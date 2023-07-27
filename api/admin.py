@@ -72,7 +72,7 @@ class Categories(admin.ModelAdmin):
 class Producers(admin.ModelAdmin):
     fieldsets = (
         ('Информация о бренде', {
-            'fields': ('name', 'passenger', 'truck', 'condition')
+            'fields': ('name', 'passenger', 'truck', 'condition','summa')
         }),
     )
     list_display = ('id', 'name', 'passenger', 'truck')
